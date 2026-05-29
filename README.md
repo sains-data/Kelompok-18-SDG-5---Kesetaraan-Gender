@@ -260,13 +260,21 @@ Script 01 → 02 → 03 → 04 → 05 → 06 → 07 → 08 → 09 → 10
 
 | Metrik | Pandas (Baseline) | Spark | Keterangan |
 |--------|-------------------|-------|------------|
-| Durasi total pipeline | **0.63 detik** | ~11–18 detik | Spark lebih lambat untuk data kecil |
-| Throughput | **131.161 baris/dtk** | ~10.000 baris/dtk | Overhead JVM Spark |
-| Data valid | 82.999 baris (100%) | 82.999 baris | Sama |
-| Rasio kompresi (CSV→Silver) | **1:4.4** | *(diukur)* | Parquet Snappy |
-| Skalabilitas | Single machine | Horizontal scale | Keunggulan Spark di GB/TB |
+| Durasi total pipeline | **0.63 detik** | - | Diisi setelah uji skalabilitas dijalankan |
+| Throughput (baris/dtk) | **131.161** | - | Diisi setelah uji skalabilitas dijalankan |
+| Data valid | **82.999 baris (100%)** | - | Diisi setelah Script 04 diverifikasi |
+| Rasio kompresi CSV→Silver | **1:4.4** | - | Diisi setelah `cek_kompresi.py` dijalankan |
+| Rasio kompresi CSV→Gold | - | - | Diisi setelah `cek_kompresi.py` dijalankan |
 
-> ⚠️ **Catatan Ilmiah:** Spark lebih lambat dari Pandas untuk dataset 32 MB — ini adalah **temuan yang valid secara ilmiah**. Keunggulan komputasi terdistribusi Spark baru terasa pada skala **GB hingga TB**. Proyek ini membuktikan bahwa arsitektur Medallion tetap relevan untuk data yang akan terus bertambah secara longitudinal.
+### Uji Skalabilitas Spark
+
+| Jumlah File | Jumlah Baris | Durasi (detik) | Throughput (baris/dtk) | Sub-linear? |
+|-------------|-------------|----------------|------------------------|-------------|
+| 2 file | ~20.000 | - | - | - |
+| 4 file | ~41.000 | - | - | - |
+| 8 file | 82.999 | - | - | - |
+
+> ⚠️ **Catatan Ilmiah:** Keunggulan komputasi terdistribusi Spark baru terasa pada skala **GB hingga TB**. Proyek ini membuktikan bahwa arsitektur Medallion tetap relevan untuk data yang akan terus bertambah secara longitudinal.
 
 ---
 
@@ -282,14 +290,31 @@ Model ARIMA dibangun untuk memprediksi tren kesenjangan upah gender 2025–2027 
 | **Test** | 2023–2024 | 2 titik |
 | **Prediksi** | 2025–2027 | 3 titik |
 
-### Target Metrik Evaluasi
+### Hasil Uji Stasioneritas (ADF Test)
 
-| Metrik | Target | Interpretasi |
-|--------|--------|-------------|
-| MAE | < 1.0 pp | Selisih prediksi vs aktual dalam persen poin |
-| RMSE | < 1.5 pp | Penalti lebih besar untuk error besar |
-| MAPE | < 10% | Error relatif — < 10% = sangat baik |
-| AIC/BIC | Minimum | Kriteria pemilihan order model terbaik |
+| Seri | ADF Statistic | p-value | Stasioner? |
+|------|--------------|---------|------------|
+| avg_diff_mean_hourly (asli) | - | - | - |
+| avg_diff_mean_hourly (first diff) | - | - | - |
+
+### Model Terpilih & Metrik Evaluasi
+
+| Metrik | Nilai | Target | Terpenuhi? |
+|--------|-------|--------|------------|
+| Model order ARIMA(p,d,q) | - | - | - |
+| AIC | - | Minimum | - |
+| BIC | - | Minimum | - |
+| MAE | - | < 1.0 pp | - |
+| RMSE | - | < 1.5 pp | - |
+| MAPE | - | < 10% | - |
+
+### Hasil Prediksi 2025–2027
+
+| Tahun | Prediksi (%) | CI Lower 95% | CI Upper 95% |
+|-------|-------------|-------------|-------------|
+| 2025  | - | - | - |
+| 2026  | - | - | - |
+| 2027  | - | - | - |
 
 > ⚠️ **Keterbatasan:** Dengan hanya 8 titik data, confidence interval prediksi relatif lebar. Ini bukan kekurangan pengerjaan, melainkan keterbatasan dataset yang justru menunjukkan kemampuan **analisis kritis** dalam memahami batas model statistik.
 
@@ -299,10 +324,10 @@ Model ARIMA dibangun untuk memprediksi tren kesenjangan upah gender 2025–2027 
 
 | No | Nama | Peran | NIM | GitHub |
 |----|------|-------|-----|--------|
-| 1 | **f** | Ketua | 12345 |... |
-| 2 | **f** | Anggota 1 |12345  | ...|
-| 3 | **f** | Anggota 2 | 12345 | .. |
-| 4 | **f** | Anggota 3 | 12345 | . |
+| 1 | - | Ketua | - | - |
+| 2 | - | Anggota 1 | - | - |
+| 3 | - | Anggota 2 | - | - |
+| 4 | - | Anggota 3 | - | - |
 
 ---
 
