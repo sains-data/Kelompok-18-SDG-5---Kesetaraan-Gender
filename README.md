@@ -1,353 +1,220 @@
 <div align="center">
 
-<img src="https://img.shields.io/badge/Apache%20Spark-E25A1C?style=for-the-badge&logo=apachespark&logoColor=white"/>
-<img src="https://img.shields.io/badge/MinIO-C72E49?style=for-the-badge&logo=minio&logoColor=white"/>
-<img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white"/>
-<img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white"/>
-<img src="https://img.shields.io/badge/PySpark-E25A1C?style=for-the-badge&logo=apachespark&logoColor=white"/>
+# 🏭 UK Gender Pay Gap — Medallion Architecture Pipeline
 
-<br/><br/>
+<p align="center">
+  <img src="https://img.shields.io/badge/Apache%20Spark-E25A1C?style=for-the-badge&logo=apachespark&logoColor=white" />
+  <img src="https://img.shields.io/badge/MinIO-C72E49?style=for-the-badge&logo=minio&logoColor=white" />
+  <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" />
+  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" />
+  <img src="https://img.shields.io/badge/PySpark-E25A1C?style=for-the-badge&logo=apachespark&logoColor=white" />
+</p>
 
-# 🏅 Medallion Architecture for Gender Pay Gap Analysis
-### *Implementasi Apache Spark + ARIMA untuk Analisis & Prediksi Tren Kesenjangan Upah Gender UK*
+<p align="center">
+  <b>Implementasi Medallion Architecture berbasis Apache Spark & Docker</b><br/>
+  untuk analisis skalabilitas tren kesenjangan upah gender di Inggris (2017–2025)
+</p>
 
-**Tugas Besar Analisis Big Data — Sains Data ITERA 2026**
-**Kelompok 18 · Kelas RB**
-
----
-
-[![Status](https://img.shields.io/badge/Status-55--60%25%20Selesai-yellow?style=flat-square)]()
-[![Dataset](https://img.shields.io/badge/Dataset-UK%20Gender%20Pay%20Gap%202017--2025-blue?style=flat-square)]()
-[![Records](https://img.shields.io/badge/Records-82.999%20baris-green?style=flat-square)]()
-[![SDG](https://img.shields.io/badge/SDG-5%20Gender%20Equality-E5243B?style=flat-square)]()
+<p align="center">
+  <img src="https://img.shields.io/badge/Dataset-82.999%20rows-informational?style=flat-square" />
+  <img src="https://img.shields.io/badge/Format-Parquet%20%2B%20Snappy-success?style=flat-square" />
+  <img src="https://img.shields.io/badge/Kompresi-1%3A4%2C4-orange?style=flat-square" />
+  <img src="https://img.shields.io/badge/SDG-Goal%205%20%7C%20Gender%20Equality-purple?style=flat-square" />
+</p>
 
 </div>
 
 ---
 
-## 📋 Daftar Isi
+## 📌 Deskripsi Proyek
 
-- [Tentang Proyek](#-tentang-proyek)
-- [Arsitektur Sistem](#-arsitektur-sistem)
-- [Dataset](#-dataset)
-- [Struktur Direktori](#-struktur-direktori)
-- [Cara Menjalankan](#-cara-menjalankan)
-- [Pipeline & Urutan Script](#-pipeline--urutan-script)
-- [Hasil & Temuan](#-hasil--temuan)
-- [Perbandingan Spark vs Pandas](#-perbandingan-spark-vs-pandas)
-- [Model ARIMA](#-model-arima)
-- [Anggota Tim](#-anggota-tim)
-- [Referensi](#-referensi)
+Proyek **Tugas Besar Analisis Big Data** ini membangun pipeline data terdistribusi menggunakan **Medallion Architecture** untuk memproses dataset *UK Government Gender Pay Gap* periode 2017–2025.
+
+Pipeline membandingkan dua pendekatan:
+- 🐼 **Pandas** — baseline single-node, cepat untuk data kecil
+- ⚡ **Apache Spark** — distributed processing, unggul di skala GB/TB
+
+> Proyek ini mendukung analisis Sustainable Development Goal 5 (SDG 5) — Kesetaraan Gender.
 
 ---
 
-## 🔍 Tentang Proyek
-
-Proyek ini mengimplementasikan **Medallion Architecture** berbasis **Apache Spark** dalam lingkungan terkontainerisasi (Docker) untuk memproses dan menganalisis data kesenjangan upah gender (*gender pay gap*) di Inggris selama periode **2017–2025**.
-
-Selain evaluasi performa pipeline terdistribusi vs. tradisional, proyek ini juga menambahkan **model prediksi ARIMA** untuk memperkirakan tren kesenjangan upah hingga tahun 2027 — berkontribusi pada pemahaman empiris terhadap **SDG 5: Kesetaraan Gender**.
-
-### 🎯 Pertanyaan Ilmiah
-
-> 1. Apakah implementasi Medallion Architecture berbasis Apache Spark mampu meningkatkan throughput pemrosesan secara signifikan dibandingkan pipeline Pandas tradisional?
-> 2. Seberapa akurat model ARIMA dalam memprediksi tren kesenjangan upah gender untuk periode 2025–2027?
-
----
-
-## 🏗 Arsitektur Sistem
+## 🏗️ Arsitektur Sistem
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                     MEDALLION ARCHITECTURE                      │
-│                                                                 │
-│   ┌──────────┐      ┌──────────┐      ┌──────────────────────┐ │
-│   │  BRONZE  │ ───► │  SILVER  │ ───► │        GOLD          │ │
-│   │          │      │          │      │                      │ │
-│   │ Raw CSV  │      │  Parquet │      │ ┌──────────────────┐ │ │
-│   │ 8 files  │      │  Snappy  │      │ │  gold/tahunan/   │ │ │
-│   │ 32.06 MB │      │ 7.23 MB  │      │ │  gold/per_ukuran/│ │ │
-│   │          │      │ 82.999   │      │ └──────────────────┘ │ │
-│   └──────────┘      │  baris   │      │   Agregasi Analitik  │ │
-│                     └──────────┘      └──────────────────────┘ │
-│                                                                 │
-│         Semua layer tersimpan di MinIO Object Storage           │
-└─────────────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────────────┐
-│                    INFRASTRUKTUR DOCKER                         │
-│                                                                 │
-│  ┌─────────────┐   ┌─────────────┐   ┌─────────────────────┐  │
-│  │ Spark Master│   │  Spark      │   │  MinIO              │  │
-│  │ :8080       │──►│  Worker 1   │   │  Object Storage     │  │
-│  │             │   ├─────────────┤   │  :9001              │  │
-│  └─────────────┘   │  Spark      │   │  bucket: bigdata-lab│  │
-│                    │  Worker 2   │   └─────────────────────┘  │
-│                    └─────────────┘                             │
-└─────────────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────────────┐
-│                     EKSTENSI ARIMA                              │
-│                                                                 │
-│   Gold/tahunan  ──►  ts_data.csv  ──►  ADF Test  ──►  ARIMA   │
-│   (8 titik: 2018–2025)                             (p, d, q)   │
-│                                          ▼                     │
-│                               Prediksi 2025–2027               │
-│                               + Confidence Interval 95%        │
+│                     MEDALLION ARCHITECTURE                       │
+│                                                                   │
+│   ┌──────────┐    ┌──────────┐    ┌──────────┐                  │
+│   │  BRONZE  │───▶│  SILVER  │───▶│   GOLD   │                  │
+│   │  Raw CSV │    │ Parquet  │    │Aggregated│                  │
+│   │  MinIO   │    │ (Snappy) │    │ SparkSQL │                  │
+│   └──────────┘    └──────────┘    └──────────┘                  │
+│                                                                   │
+│   ┌────────────────────────────────────────────┐                 │
+│   │  Apache Spark Cluster (Docker)             │                 │
+│   │  ┌──────────┐  ┌──────────┐  ┌──────────┐ │                 │
+│   │  │  Master  │  │ Worker 1 │  │ Worker 2 │ │                 │
+│   │  │ :8080    │  │          │  │          │ │                 │
+│   │  └──────────┘  └──────────┘  └──────────┘ │                 │
+│   └────────────────────────────────────────────┘                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 📊 Dataset
+## 📊 Hasil Utama
 
-| Informasi | Detail |
-|-----------|--------|
-| **Sumber** | [UK Government Gender Pay Gap Service](https://gender-pay-gap.service.gov.uk) |
-| **Rentang Tahun** | 2017 – 2025 |
-| **Jumlah File** | 8 file CSV |
-| **Total Baris** | 82.999 baris |
-| **Total Kolom** | 27 kolom |
-| **Ukuran Total** | 32.06 MB |
-| **Format Output** | Parquet (Snappy compression) |
+### ⚡ Perbandingan Performa
 
-Dataset mencakup informasi nama perusahaan, ukuran perusahaan, persentase kesenjangan upah rata-rata & median, distribusi karyawan perempuan di setiap kuartil upah, dan informasi bonus tahunan. Dataset hanya mencakup perusahaan dengan **≥250 karyawan**.
+| Metrik | 🐼 Pandas | ⚡ Spark |
+|--------|----------|---------|
+| Durasi pipeline | **0,63 detik** | 11–18 detik |
+| Throughput | **131.161 baris/dtk** | ~10.000 baris/dtk |
+| Skalabilitas | ❌ Linear / RAM terbatas | ✅ Sub-linear (terbukti) |
+| Fault tolerance | ❌ Tidak ada | ✅ RDD lineage |
+| Rasio kompresi | 1:4,4 | 1:3,0 |
+
+> ⚠️ Spark lebih lambat pada dataset kecil (32 MB) — ini temuan ilmiah yang valid. Keunggulan Spark baru terasa pada skala **GB/TB**.
+
+### 📉 Tren Kesenjangan Upah Gender (UK)
+
+| Tahun | Mean Gap | Median Gap | Jumlah Perusahaan |
+|-------|----------|------------|-------------------|
+| 2018  | 14,03%   | 10,78%     | 7.289 |
+| 2020  | 14,54%   | 12,45%     | 4.638 *(COVID-19)* |
+| 2022  | 13,55%   | 11,82%     | 7.297 |
+| 2025  | **12,14%**| **11,00%**| 7.822 |
+
+📌 Tren **menurun konsisten** dari 14,03% (2018) → 12,14% (2025).  
+📌 Perusahaan **500–999 karyawan** memiliki gap tertinggi (13,67%).
 
 ---
 
-## 📁 Struktur Direktori
+## 🗂️ Struktur Repository
 
 ```
-bigdata-kelompok18-rb/
-│
-├── 📄 docker-compose.yml         # Konfigurasi Spark cluster + MinIO
-│
-├── 🐍 01_eksplorasi.py           # Eksplorasi & verifikasi dataset
-├── 🐍 02_baseline_pandas.py      # Pipeline baseline (Pandas, mesin tunggal)
-├── 🐍 03_bronze_ingestion.py     # Upload CSV → MinIO Bronze layer
-├── 🐍 04_silver_spark.py         # Transformasi Bronze → Silver (PySpark)
-├── 🐍 05_gold_spark.py           # Agregasi Silver → Gold (PySpark)
-├── 🐍 06_visualisasi_tren.py     # Visualisasi tren historis
-├── 🐍 07_ts_preparation.py       # Persiapan data time series untuk ARIMA
-├── 🐍 08_stationarity_test.py    # Uji stasioneritas ADF + plot ACF/PACF
-├── 🐍 09_arima_model.py          # Fitting, evaluasi & prediksi ARIMA
-├── 🐍 10_visualisasi_prediksi.py # Visualisasi historis + prediksi gabungan
-│
-├── 📁 output-baseline/           # Output lokal Pandas & semua grafik (.png)
-│   ├── silver_ukgpg.parquet
-│   ├── gold_ukgpg.parquet
-│   ├── ts_data.csv
-│   ├── arima_hasil.json
-│   ├── tren_historis.png
-│   ├── acf_pacf.png
-│   ├── skalabilitas_spark.png
-│   └── prediksi_arima.png
-│
-├── 📄 README.md
-├── 📄 PROGRESS.md
-└── 📄 .gitignore                 # data-raw/ dikecualikan (>30 MB)
+Tubes_ABD/
+├── 📁 data-raw/                   # Dataset CSV mentah (2017–2025)
+│   ├── GPG_2017-18.csv
+│   ├── GPG_2018-19.csv
+│   └── ...
+├── 📁 scripts/
+│   ├── 01_eksplorasi.py           # Eksplorasi & validasi dataset
+│   ├── 02_baseline_pandas.py      # Pipeline Bronze→Silver→Gold (Pandas)
+│   ├── 03_bronze_ingestion.py     # Upload CSV ke MinIO
+│   ├── 04_silver_spark.py         # Transformasi CSV→Parquet (PySpark)
+│   └── 05_gold_spark.py           # Agregasi analitik (SparkSQL)
+├── 📁 notebooks/
+│   └── visualisasi_tren.ipynb     # Visualisasi interaktif
+├── 📄 docker-compose.yml          # Orkestrasi Spark + MinIO
+├── 📄 requirements.txt
+└── 📄 README.md
 ```
-
-> ⚠️ **Catatan:** Folder `data-raw/` tidak di-push ke repository (ukuran >30 MB). Dataset dapat diunduh langsung dari [gender-pay-gap.service.gov.uk](https://gender-pay-gap.service.gov.uk/viewing/download).
 
 ---
 
 ## 🚀 Cara Menjalankan
 
-### Prasyarat
+### 1. Prerequisites
 
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) terinstall dan berjalan
+```bash
+# Pastikan sudah terinstall:
+- Docker Desktop
 - Python 3.10+
-- VS Code (opsional, namun direkomendasikan)
-
-### 1. Clone Repository
-
-```bash
-git clone https://github.com/<username>/bigdata-kelompok18-rb.git
-cd bigdata-kelompok18-rb
+- pip
 ```
 
-### 2. Unduh Dataset
-
-Unduh 8 file CSV dari [UK Gender Pay Gap Service](https://gender-pay-gap.service.gov.uk/viewing/download) dan simpan ke folder `data-raw/`.
-
-### 3. Jalankan Cluster
+### 2. Clone & Install Dependencies
 
 ```bash
-# Setiap kali membuka laptop, jalankan perintah ini:
+git clone https://github.com/<username>/tubes-abd-kelompok18.git
+cd tubes-abd-kelompok18
+
+pip install -r requirements.txt
+```
+
+### 3. Jalankan Infrastruktur (Docker)
+
+```bash
 docker compose up -d
-
-# Verifikasi — harus ada 4 container running:
-docker ps
 ```
 
-| Container | Akses |
-|-----------|-------|
-| Spark Master | http://localhost:8080 |
-| MinIO Console | http://localhost:9001 (minioadmin / minioadmin) |
+Verifikasi:
+- **Spark Master UI** → http://localhost:8080
+- **MinIO Console** → http://localhost:9001 (user: `minioadmin` / pass: `minioadmin`)
 
-### 4. Install Dependensi Python
+### 4. Jalankan Pipeline Secara Berurutan
 
 ```bash
-pip install pyspark boto3 minio pandas pyarrow statsmodels matplotlib scikit-learn --break-system-packages
+# Step 1 — Eksplorasi dataset
+python scripts/01_eksplorasi.py
+
+# Step 2 — Baseline Pandas
+python scripts/02_baseline_pandas.py
+
+# Step 3 — Upload ke Bronze (MinIO)
+python scripts/03_bronze_ingestion.py
+
+# Step 4 — Transformasi Silver (Spark)
+python scripts/04_silver_spark.py
+
+# Step 5 — Agregasi Gold (Spark + SparkSQL)
+python scripts/05_gold_spark.py
 ```
 
-### 5. Jalankan Pipeline (Urutan Script)
+---
 
-Lihat bagian [Pipeline & Urutan Script](#-pipeline--urutan-script) di bawah.
+## 🧰 Teknologi yang Digunakan
 
-### 6. Matikan Cluster (selesai kerja)
-
-```bash
-docker compose down
-```
+| Teknologi | Versi | Fungsi |
+|-----------|-------|--------|
+| Apache Spark | 3.x | Distributed data processing |
+| PySpark | 3.x | Python API untuk Spark |
+| MinIO | Latest | S3-compatible object storage |
+| Docker Compose | v2 | Container orchestration |
+| Python | 3.10 | Bahasa pemrograman utama |
+| Pandas | 2.x | Baseline single-node pipeline |
+| boto3 | Latest | S3-compatible MinIO client |
+| Parquet + Snappy | — | Format penyimpanan kolumnar |
 
 ---
 
-## ⚙️ Pipeline & Urutan Script
+## 👥 Tim Pengembang
 
-Jalankan script **secara berurutan**. Script yang sudah selesai ✅ tidak perlu dijalankan ulang.
-
-```
-Script 01 → 02 → 03 → 04 → 05 → 06 → 07 → 08 → 09 → 10
-```
-
-| # | Script | Status | Deskripsi | Output |
-|---|--------|--------|-----------|--------|
-| 01 | `01_eksplorasi.py` | ✅ Selesai | Verifikasi 8 file CSV (baris, kolom, konsistensi schema) | Log terminal |
-| 02 | `02_baseline_pandas.py` | ✅ Selesai | Pipeline Bronze→Silver→Gold menggunakan Pandas (pembanding) | `output-baseline/` |
-| 03 | `03_bronze_ingestion.py` | ✅ Selesai | Upload 8 CSV ke MinIO `bigdata-lab/bronze/` | MinIO Bronze layer |
-| 04 | `04_silver_spark.py` | ✅ Selesai | Transformasi & pembersihan data dengan PySpark | MinIO Silver layer |
-| 05 | `05_gold_spark.py` | ✅ Selesai | Agregasi per tahun & per ukuran perusahaan | MinIO Gold layer |
-| 06 | `06_visualisasi_tren.py` | 🔲 Belum | Visualisasi tren historis kesenjangan upah 2018–2025 | `tren_historis.png` |
-| 07 | `07_ts_preparation.py` | 🔲 Belum | Ekstrak Gold → format time series CSV | `ts_data.csv` |
-| 08 | `08_stationarity_test.py` | 🔲 Belum | Uji ADF + plot ACF/PACF, tentukan parameter (p,d,q) | `acf_pacf.png` |
-| 09 | `09_arima_model.py` | 🔲 Belum | Grid search ARIMA, evaluasi MAE/RMSE/MAPE, prediksi 2025–2027 | `arima_hasil.json` |
-| 10 | `10_visualisasi_prediksi.py` | 🔲 Belum | Gabungkan tren historis + prediksi + confidence interval | `prediksi_arima.png` |
+| No | Nama | NIM | Peran | GitHub |
+|----|------|-----|-------|--------|
+| 1 |=== | == | Ketua | == |
+| 2 |=== | == | Anggota 1 | == |
+| 3 | == | == | Anggota 2 | == |
+| 4 | == | ==  | Anggota 3 | == |
 
 ---
 
-## 📈 Hasil & Temuan
+## 📚 Dataset
 
-### Tren Kesenjangan Upah Gender UK (2018–2025)
-
-| Tahun | Avg Mean Hourly (%) | Avg Median Hourly (%) | Jumlah Perusahaan |
-|-------|--------------------|-----------------------|-------------------|
-| 2018  | 14.03              | 10.78                 | 7.289             |
-| 2019  | 13.90              | 10.76                 | 7.254             |
-| 2020  | 14.54              | 12.45                 | 4.638             |
-| 2021  | 14.06              | 12.18                 | 7.301             |
-| 2022  | 13.55              | 11.82                 | 7.297             |
-| 2023  | 13.18              | 11.69                 | 7.563             |
-| 2024  | 12.56              | 11.25                 | 7.742             |
-| 2025  | 12.14              | 11.00                 | 7.822             |
-
-> 💡 **Temuan Utama:** Kesenjangan upah gender di Inggris **menurun konsisten** dari **14.03% (2018) menjadi 12.14% (2025)** — penurunan ~2 persen poin dalam 7 tahun. Anomali tahun 2020 (naik ke 14.54%) kemungkinan besar dipengaruhi oleh pandemi COVID-19 yang menyebabkan lebih sedikit perusahaan melapor.
-
-### Kesenjangan per Ukuran Perusahaan
-
-| Ukuran Perusahaan | Avg Mean Hourly (%) | Jumlah Perusahaan |
-|-------------------|--------------------|--------------------|
-| 500 to 999        | 13.67%             | 14.460             |
-| 250 to 499        | 13.66%             | 25.954             |
-| 1000 to 4999      | 12.93%             | 11.302             |
-| 5000 to 19,999    | 12.90%             | 1.876              |
-| 20,000 or more    | 12.56%             | 317                |
-| Less than 250     | 12.45%             | 2.500              |
+| Info | Detail |
+|------|--------|
+| Sumber | [UK Government Gender Pay Gap Service](https://gender-pay-gap.service.gov.uk/viewing/download) |
+| Rentang | 2017 – 2025 |
+| Jumlah baris | 82.999 |
+| Kolom | 27 |
+| Ukuran total | 32,06 MB (CSV) |
+| Cakupan | Perusahaan ≥ 250 karyawan di Inggris |
 
 ---
 
-## ⚡ Perbandingan Spark vs Pandas
+## 📖 Referensi
 
-| Metrik | Pandas (Baseline) | Spark | Keterangan |
-|--------|-------------------|-------|------------|
-| Durasi total pipeline | **0.63 detik** | - | Diisi setelah uji skalabilitas dijalankan |
-| Throughput (baris/dtk) | **131.161** | - | Diisi setelah uji skalabilitas dijalankan |
-| Data valid | **82.999 baris (100%)** | - | Diisi setelah Script 04 diverifikasi |
-| Rasio kompresi CSV→Silver | **1:4.4** | - | Diisi setelah `cek_kompresi.py` dijalankan |
-| Rasio kompresi CSV→Gold | - | - | Diisi setelah `cek_kompresi.py` dijalankan |
-
-### Uji Skalabilitas Spark
-
-| Jumlah File | Jumlah Baris | Durasi (detik) | Throughput (baris/dtk) | Sub-linear? |
-|-------------|-------------|----------------|------------------------|-------------|
-| 2 file | ~20.000 | - | - | - |
-| 4 file | ~41.000 | - | - | - |
-| 8 file | 82.999 | - | - | - |
-
-> ⚠️ **Catatan Ilmiah:** Keunggulan komputasi terdistribusi Spark baru terasa pada skala **GB hingga TB**. Proyek ini membuktikan bahwa arsitektur Medallion tetap relevan untuk data yang akan terus bertambah secara longitudinal.
-
----
-
-## 🔮 Model ARIMA
-
-Model ARIMA dibangun untuk memprediksi tren kesenjangan upah gender 2025–2027 berdasarkan data historis 8 titik waktu (2018–2025).
-
-### Strategi Train/Test Split
-
-| Set | Tahun | Jumlah Titik |
-|-----|-------|-------------|
-| **Train** | 2018–2022 | 5 titik |
-| **Test** | 2023–2024 | 2 titik |
-| **Prediksi** | 2025–2027 | 3 titik |
-
-### Hasil Uji Stasioneritas (ADF Test)
-
-| Seri | ADF Statistic | p-value | Stasioner? |
-|------|--------------|---------|------------|
-| avg_diff_mean_hourly (asli) | - | - | - |
-| avg_diff_mean_hourly (first diff) | - | - | - |
-
-### Model Terpilih & Metrik Evaluasi
-
-| Metrik | Nilai | Target | Terpenuhi? |
-|--------|-------|--------|------------|
-| Model order ARIMA(p,d,q) | - | - | - |
-| AIC | - | Minimum | - |
-| BIC | - | Minimum | - |
-| MAE | - | < 1.0 pp | - |
-| RMSE | - | < 1.5 pp | - |
-| MAPE | - | < 10% | - |
-
-### Hasil Prediksi 2025–2027
-
-| Tahun | Prediksi (%) | CI Lower 95% | CI Upper 95% |
-|-------|-------------|-------------|-------------|
-| 2025  | - | - | - |
-| 2026  | - | - | - |
-| 2027  | - | - | - |
-
-> ⚠️ **Keterbatasan:** Dengan hanya 8 titik data, confidence interval prediksi relatif lebar. Ini bukan kekurangan pengerjaan, melainkan keterbatasan dataset yang justru menunjukkan kemampuan **analisis kritis** dalam memahami batas model statistik.
-
----
-
-## 👥 Anggota Tim
-
-| No | Nama | Peran | NIM | GitHub |
-|----|------|-------|-----|--------|
-| 1 | - | Ketua | - | - |
-| 2 | - | Anggota 1 | - | - |
-| 3 | - | Anggota 2 | - | - |
-| 4 | - | Anggota 3 | - | - |
-
----
-
-## 📚 Referensi
-
-1. K. Ruslan and W. L. Sukma, "Decomposition of Post-Pandemic Gender Wage Gaps in Indonesia: an Analysis Across the Wage Distribution," *Jurnal Ketenagakerjaan*, vol. 20, no. 2, 2025. https://doi.org/10.47198/jnaker.v20i2
-2. UK Government Equalities Office, "Gender Pay Gap Service: Download Data," HM Government, 2025. https://gender-pay-gap.service.gov.uk/viewing/download
-
----
-
-## 📄 Lisensi
-
-Proyek ini dibuat untuk keperluan akademik dalam mata kuliah Analisis Big Data, Sains Data ITERA 2026. Dataset yang digunakan bersifat publik dan tersedia melalui portal resmi pemerintah Inggris.
+1. Ruslan, K. & Sukma, W. L. (2025). *Decomposition of Post-Pandemic Gender Wage Gaps in Indonesia: an Analysis Across the Wage Distribution*. Jurnal Ketenagakerjaan, 20(2). https://doi.org/10.47198/jnaker.v20i2
+2. Apache Software Foundation. *Apache Spark*. https://spark.apache.org
+3. Databricks. *Medallion Architecture*. https://www.databricks.com/glossary/medallion-architecture
+4. MinIO Inc. *MinIO High-Performance Object Storage*. https://min.io
 
 ---
 
 <div align="center">
 
-**Institut Teknologi Sumatera · Sains Data · 2026**
-
-*"Data is the new oil — but only if refined."*
+**Program Studi Sains Data — Institut Teknologi Sumatera**  
+Kelompok 18 RB | Analisis Big Data | 2026
 
 </div>
