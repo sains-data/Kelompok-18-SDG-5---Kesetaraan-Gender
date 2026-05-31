@@ -207,8 +207,6 @@ python scripts/05_gold_spark.py
 
 1. Ruslan, K. & Sukma, W. L. (2025). *Decomposition of Post-Pandemic Gender Wage Gaps in Indonesia: an Analysis Across the Wage Distribution*. Jurnal Ketenagakerjaan, 20(2). https://doi.org/10.47198/jnaker.v20i2
 2. Apache Software Foundation. *Apache Spark*. https://spark.apache.org
-3. Databricks. *Medallion Architecture*. https://www.databricks.com/glossary/medallion-architecture
-4. MinIO Inc. *MinIO High-Performance Object Storage*. https://min.io
 
 ---
 
