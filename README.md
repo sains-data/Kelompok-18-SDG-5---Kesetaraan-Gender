@@ -205,8 +205,8 @@ python scripts/05_gold_spark.py
 
 ## 📖 Referensi
 
-1. Ruslan, K. & Sukma, W. L. (2025). *Decomposition of Post-Pandemic Gender Wage Gaps in Indonesia: an Analysis Across the Wage Distribution*. Jurnal Ketenagakerjaan, 20(2). https://doi.org/10.47198/jnaker.v20i2
-2. Apache Software Foundation. *Apache Spark*. https://spark.apache.org
+[1] K. Ruslan and W. L. Sukma, "Decomposition of Post-Pandemic Gender Wage Gaps in Indonesia: an Analysis Across the Wage Distribution," Jurnal Ketenagakerjaan, vol. 20, no. 2, 2025. DOI: https://doi.org/10.47198/jnaker.v20i2
+[2] UK Government Equalities Office, "Gender Pay Gap Service: Download Data," HM Government, 2025. [Online]. Available: https://gender-pay-gap.service.gov.uk/viewing/download. [Accessed: May 2026].
 
 ---
 
