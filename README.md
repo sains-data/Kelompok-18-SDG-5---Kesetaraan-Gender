@@ -183,10 +183,10 @@ python scripts/05_gold_spark.py
 
 | No | Nama | NIM | Peran | GitHub |
 |----|------|-----|-------|--------|
-| 1 |=== | == | Ketua | == |
-| 2 |=== | == | Anggota 1 | == |
-| 3 | == | == | Anggota 2 | == |
-| 4 | == | ==  | Anggota 3 | == |
+| 1 | Muhammad Hanif Dzaky Arifin | == | Ketua | == |
+| 2 | Wulan Lumbantoruan | == | Anggota 1 | == |
+| 3 | Aprilia Dewi Hutapea | == | Anggota 2 | == |
+| 4 | Haikal Fransisko Simbolon | ==  | Anggota 3 | == |
 
 ---
 
