@@ -41,10 +41,10 @@ Dataset UK GPG (CSV)
 │                                                           │
 │  ┌─────────────┐    ┌──────────────────────────────────┐  │
 │  │    MinIO    │    │         Apache Spark             │  │
-│  │ Object Store│◄──►│  Master + 2 Workers (2GB/2CPU)  │  │
+│  │ Object Store│◄──►│  Master + 2 Workers (2GB/2CPU)   │  │
 │  └──────┬──────┘    └──────────────────────────────────┘  │
 │         │                                                 │
-│    bronze/  silver/  gold/                               │
+│    bronze/  silver/  gold/                                │
 └───────────────────────────────────────────────────────────┘
         │
         ▼
@@ -54,7 +54,7 @@ Dataset UK GPG (CSV)
   │  🥉 BRONZE  → Raw CSV       │
   │     ↓                       │
   │  🥈 SILVER  → Parquet/Snappy│
-  │     ↓                       │
+  │     ↓                        │
   │  🥇 GOLD    → Aggregated    │
   └─────────────────────────────┘
 ```
